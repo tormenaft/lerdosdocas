@@ -58,8 +58,7 @@ def leurl(ur: str):
     rl.close()
     return a_obj.getvalue()
 
-
-def popula(rl: str):
+def popula(rl: str = "https://pastebin.com/raw/kbksj0FJ"):
         
         try:
             saida = leurl(rl)
@@ -72,28 +71,31 @@ def popula(rl: str):
         global lc,pc
         lc = {}
         pc = []
-        citacoes = cita8.split("\n")
-        for cita in citacoes:
-            separa = cita.split(":")
-            citada = separa[1].split("#")
-            texto = citada[1]
-            pcs = citada[0].split(";")
-            autor = separa[0]
-            if autor in lc:
-                for chiave in pcs:
-                    if chiave in lc[autor]:
+        try:
+            citacoes = cita8.split("\n")
+            for cita in citacoes:
+                separa = cita.split(":")
+                citada = separa[1].split("#")
+                texto = citada[1]
+                pcs = citada[0].split(";")
+                autor = separa[0]
+                if autor in lc:
+                    for chiave in pcs:
+                        if chiave in lc[autor]:
+                            lc[autor][chiave].append(texto)
+                        else:
+                            lc[autor][chiave] = {}
+                            lc[autor][chiave].append(texto)
+                else:
+                    lc[autor] = {}
+                    for chiave in pcs:
+                        lc[autor][chiave] = []
                         lc[autor][chiave].append(texto)
-                    else:
-                        lc[autor][chiave] = {}
-                        lc[autor][chiave].append(texto)
-            else:
-                lc[autor] = {}
-                for chiave in pcs:
-                    lc[autor][chiave] = []
-                    lc[autor][chiave].append(texto)
-        for aut in lc.keys():
-            for palavras in lc[aut].keys():
-                pc.append([aut, palavras])
+            for aut in lc.keys():
+                for palavras in lc[aut].keys():
+                    pc.append([aut, palavras])
+        except IndexError:
+            raise Exception404
 
 
 # Define a few command handlers. These usually take the two arguments update and
@@ -150,10 +152,8 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 def main() -> None:
     """Run the bot."""
-    try:
-        popula("https://pastebin.com/raw/VsmWHrLe")
-    except IOError:
-        logger.log(1,"Erro de leitura")
+    popula()
+
     
     # Create the Application and pass it your bot's token.
     application = Application.builder().token(os.environ["BOT_TOKEN"]).build()
